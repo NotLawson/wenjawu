@@ -13,7 +13,7 @@ def random_attribution_comment():
         "how much wood could a wood chuck chuck if a wood chuck could chuck wood",
         "sponsored by wenjawu",
         "whipped into shape by wenjawu",
-        "deepfried via reid (the airfryer) by wenjawu",
+        "fried via reid (the airfryer) by wenjawu",
         "<insert joke here> - wenjawu",
         "by your ai overlord, wenjawu",
         "baked on high heat by wenjawu",
@@ -68,9 +68,12 @@ def remove_tracker(message):
     words = message.content.split(" ")
     link = ""
     for word in words:
-        if "https://open.spotify.com" in word:
-            link = word.split("?")[0]
-            return link
+        for url in config["urls"]:
+            if url in word:
+                link = word.split("?")
+                if len(link) < 2:
+                    return # stop execution
+                return link[0]
 
 class Wenjawu(commands.Bot):
     def __init__(self, config={}, **kwargs):
@@ -92,10 +95,10 @@ class Wenjawu(commands.Bot):
         if self.blacklist.listed(message.author) == True:
             return # stop execution
         
-        if message.content == "type":
+        if message.content.lower() == "type":
             await message.reply("shit\n-# " + random_attribution_comment())
 
-        if "https://open.spotify.com" in message.content:
+        if any(url in message.content for url in config["urls"]):
             await message.reply("tracker removed: " + remove_tracker(message) + "\n-# " + random_attribution_comment())
 
 
@@ -125,4 +128,5 @@ async def unblacklist_user(interaction: discord.Interaction):
     except BlacklistUserDoesNotExist:
         await interaction.response.send_message("You're not on the blacklist :)", ephemeral=True)
 
-client.run(config.get("token"))
+if __name__ == "__main__":
+    client.run(config.get("token"))
