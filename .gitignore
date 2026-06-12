@@ -209,3 +209,5 @@ __marimo__/
 
 # Config files
 config.json
+attitude.json
+blacklist.txt

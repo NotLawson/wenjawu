@@ -2,7 +2,10 @@
 import discord
 from discord.ext import commands
 import random
+import re
+import json
 import logging
+import pathlib as pl
 
 LOGGER = logging.getLogger()
 
@@ -13,10 +16,10 @@ def random_attribution_comment():
         "wenjawu wenjawu wenjawu",
         "#wenjawu",
         "helpfully commented by wenjawu",
-        "how much wood could a wood chuck chuck if a wood chuck could chuck wood",
+        "how much wood could a wood chuck chuck if a wood chuck could chuck wood (wenjawu)",
         "sponsored by wenjawu",
         "whipped into shape by wenjawu",
-        "fried via reid (the airfryer) by wenjawu",
+        "fried with an airfryer by wenjawu",
         "<insert joke here> - wenjawu",
         "by your ai overlord, wenjawu",
         "baked on high heat by wenjawu",
@@ -24,7 +27,11 @@ def random_attribution_comment():
         "spawned into existence by wenjawu",
         "reproduced by wenjawu",
         "matter formed into the concept of a message by wenjawu",
-        "3.14159265359 - wenjawu"
+        "3.14159265359 - wenjawu",
+        "'wenjawu might be the greatest invention of all time' - wenjawu",
+        "mason?",
+        "knock knock. who's there? wenjawu!       wenjawu who? ...that's the end of the joke, stupid.",
+        "delivered through the network of rats hidding in your walls organised by wenjawu"
     ])
 
 class BlacklistUserDoesNotExist(Exception):
@@ -87,6 +94,7 @@ def remove_tracker(message):
                 LOGGER.debug("Linked cleaned.")
                 return link[0]
 
+
 class Wenjawu(commands.Bot):
     def __init__(self, config={}, **kwargs):
         self.config = config
@@ -111,6 +119,32 @@ class Wenjawu(commands.Bot):
             LOGGER.debug(f"Message from black listed user {str(message.author.id)} dropped.")
             return # stop execution
         
+        if "wenjawu" in message.content:
+            # wenjawu mentioned!?
+            negative = ["stupid", "idiot", "fuck", "shut up", "shutup"]
+            positive = ["love", "best", "good", "peak"]
+            # \b ensures we only match the whole word "at"
+            if bool(re.search(r"\b(" + "|".join(map(re.escape, my_list)) + r")\b", message.content.lower())): # if negative
+                await message.add_reaction(random.choice(["😢", "😭", "💔"]))
+                attitudes = json.load(open("attitude.json"))
+                if attitudes[str(message.author.id)]:
+                    attitudes[str(message.author.id)] += 1
+                else:
+                    attitudes[str(message.author.id)] = 0
+                json.dump(open("attitude.json", "w"))
+                del attitudes
+            elif bool(re.search(r"\b(" + "|".join(map(re.escape, my_list)) + r")\b", message.content.lower())): # if positive
+                await message.add_reaction(random.choice(["😘", "❤️", "😁", "😍"]))
+                attitudes = json.load(open("attitude.json"))
+                if attitudes[str(message.author.id)]:
+                    attitudes[str(message.author.id)] -= 1
+                else:
+                    attitudes[str(message.author.id)] = 0
+                json.dump(open("attitude.json", "w"))
+                del attitudes
+            else:
+                await message.add_reaction(random.choice(["👋", "🙋‍♂️", "🏄‍♂️", "🧐"]))
+
         if message.content.lower() == "type":
             LOGGER.debug("type invocation.")
             await message.reply("shit\n-# " + random_attribution_comment())
@@ -119,8 +153,11 @@ class Wenjawu(commands.Bot):
             await message.reply("tracker removed: " + remove_tracker(message) + "\n-# " + random_attribution_comment())
 
 with open("config.json", "r") as file:
-    import json
     config = json.load(file)
+
+if not pl.Path("attitude.json").exists():
+    with open("attitude.json", "w") as file:
+        file.write("{}")
 
 client = Wenjawu(config=config)
 @client.tree.command(name="blacklist", description="Stop wenjawu from responding to your messages.")
@@ -145,6 +182,16 @@ async def sync_interactions(interaction: discord.Interaction):
     await client.tree.sync(guild=interaction.guild.id)
     LOGGER.info(f"Interactions synced for {interaction.guild.id}")
     await interaction.response.send_message("Done!", ephemeral=True)
+
+@client.tree.command(name="attitude", description="How nice are you to wenjawu?")
+async def check_attitude(interaction: discord.Interaction):
+    attitudes = json.load(open("attitude.json"))
+    if not attitudes[str(interaction.user.id)]:
+        attitudes[str(interaction.user.id)] = 0
+        json.dump(open("attitude.json", "w"))
+    at = attitudes[str(interaction.user.id)]
+    await interaction.response.send_message(f"Your attitude is {at}")
+    del attitudes
 
 if __name__ == "__main__":
     client.run(config.get("token"))
