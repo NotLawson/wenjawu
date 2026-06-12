@@ -127,7 +127,7 @@ class Wenjawu(commands.Bot):
             if bool(re.search(r"\b(" + "|".join(map(re.escape, negative)) + r")\b", message.content.lower())): # if negative
                 await message.add_reaction(random.choice(["😢", "😭", "💔"]))
                 attitudes = json.load(open("attitude.json"))
-                if attitudes.get(str(interaction.user.id), False):
+                if attitudes.get(str(message.author.id), False):
                     attitudes[str(message.author.id)] += 1
                 else:
                     attitudes[str(message.author.id)] = 0
@@ -136,7 +136,7 @@ class Wenjawu(commands.Bot):
             elif bool(re.search(r"\b(" + "|".join(map(re.escape, positive)) + r")\b", message.content.lower())): # if positive
                 await message.add_reaction(random.choice(["😘", "❤️", "😁", "😍"]))
                 attitudes = json.load(open("attitude.json"))
-                if attitudes.get(str(interaction.user.id), False):
+                if attitudes.get(str(message.author.id), False):
                     attitudes[str(message.author.id)] -= 1
                 else:
                     attitudes[str(message.author.id)] = 0
