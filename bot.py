@@ -127,7 +127,7 @@ class Wenjawu(commands.Bot):
             if bool(re.search(r"\b(" + "|".join(map(re.escape, negative)) + r")\b", message.content.lower())): # if negative
                 await message.add_reaction(random.choice(["😢", "😭", "💔"]))
                 attitudes = json.load(open("attitude.json"))
-                if attitudes[str(message.author.id)]:
+                if attitudes.get(str(interaction.user.id), False):
                     attitudes[str(message.author.id)] += 1
                 else:
                     attitudes[str(message.author.id)] = 0
@@ -136,7 +136,7 @@ class Wenjawu(commands.Bot):
             elif bool(re.search(r"\b(" + "|".join(map(re.escape, positive)) + r")\b", message.content.lower())): # if positive
                 await message.add_reaction(random.choice(["😘", "❤️", "😁", "😍"]))
                 attitudes = json.load(open("attitude.json"))
-                if attitudes[str(message.author.id)]:
+                if attitudes.get(str(interaction.user.id), False):
                     attitudes[str(message.author.id)] -= 1
                 else:
                     attitudes[str(message.author.id)] = 0
@@ -186,7 +186,7 @@ async def sync_interactions(interaction: discord.Interaction):
 @client.tree.command(name="attitude", description="How nice are you to wenjawu?")
 async def check_attitude(interaction: discord.Interaction):
     attitudes = json.load(open("attitude.json"))
-    if not attitudes[str(interaction.user.id)]:
+    if not attitudes.get(str(interaction.user.id), False):
         attitudes[str(interaction.user.id)] = 0
         json.dump(open("attitude.json", "w"))
     at = attitudes[str(interaction.user.id)]
