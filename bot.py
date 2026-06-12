@@ -186,7 +186,7 @@ async def sync_interactions(interaction: discord.Interaction):
 @client.tree.command(name="attitude", description="How nice are you to wenjawu?")
 async def check_attitude(interaction: discord.Interaction):
     attitudes = json.load(open("attitude.json"))
-    if not attitudes.get(str(interaction.user.id), False):
+    if attitudes.get(str(interaction.user.id), None)==None:
         attitudes[str(interaction.user.id)] = 0
         json.dump(attitudes, open("attitude.json", "w"))
     at = attitudes[str(interaction.user.id)]
