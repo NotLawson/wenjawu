@@ -124,7 +124,7 @@ class Wenjawu(commands.Bot):
             negative = ["stupid", "idiot", "fuck", "shut up", "shutup"]
             positive = ["love", "best", "good", "peak"]
             # \b ensures we only match the whole word "at"
-            if bool(re.search(r"\b(" + "|".join(map(re.escape, my_list)) + r")\b", message.content.lower())): # if negative
+            if bool(re.search(r"\b(" + "|".join(map(re.escape, negative)) + r")\b", message.content.lower())): # if negative
                 await message.add_reaction(random.choice(["😢", "😭", "💔"]))
                 attitudes = json.load(open("attitude.json"))
                 if attitudes[str(message.author.id)]:
@@ -133,7 +133,7 @@ class Wenjawu(commands.Bot):
                     attitudes[str(message.author.id)] = 0
                 json.dump(open("attitude.json", "w"))
                 del attitudes
-            elif bool(re.search(r"\b(" + "|".join(map(re.escape, my_list)) + r")\b", message.content.lower())): # if positive
+            elif bool(re.search(r"\b(" + "|".join(map(re.escape, positive)) + r")\b", message.content.lower())): # if positive
                 await message.add_reaction(random.choice(["😘", "❤️", "😁", "😍"]))
                 attitudes = json.load(open("attitude.json"))
                 if attitudes[str(message.author.id)]:
