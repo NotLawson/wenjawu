@@ -131,7 +131,7 @@ class Wenjawu(commands.Bot):
                     attitudes[str(message.author.id)] += 1
                 else:
                     attitudes[str(message.author.id)] = 0
-                json.dump(open("attitude.json", "w"))
+                json.dump(attitudes, open("attitude.json", "w"))
                 del attitudes
             elif bool(re.search(r"\b(" + "|".join(map(re.escape, positive)) + r")\b", message.content.lower())): # if positive
                 await message.add_reaction(random.choice(["😘", "❤️", "😁", "😍"]))
@@ -140,7 +140,7 @@ class Wenjawu(commands.Bot):
                     attitudes[str(message.author.id)] -= 1
                 else:
                     attitudes[str(message.author.id)] = 0
-                json.dump(open("attitude.json", "w"))
+                json.dump(attitudes, open("attitude.json", "w"))
                 del attitudes
             else:
                 await message.add_reaction(random.choice(["👋", "🙋‍♂️", "🏄‍♂️", "🧐"]))
@@ -188,7 +188,7 @@ async def check_attitude(interaction: discord.Interaction):
     attitudes = json.load(open("attitude.json"))
     if not attitudes.get(str(interaction.user.id), False):
         attitudes[str(interaction.user.id)] = 0
-        json.dump(open("attitude.json", "w"))
+        json.dump(attitudes, open("attitude.json", "w"))
     at = attitudes[str(interaction.user.id)]
     await interaction.response.send_message(f"Your attitude is {at}")
     del attitudes
